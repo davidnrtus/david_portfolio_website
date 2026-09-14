@@ -1,0 +1,105 @@
+/* =====================================================================
+   Terminal portfolio styles. Global (not scoped) on purpose: the engine
+   inserts .line / .dim / .amb ... nodes at runtime, which scoped CSS
+   would not reach.
+   ===================================================================== */
+:root{
+  --desk:#07090b;         /* behind the window */
+  --bg:#0c1014;           /* terminal canvas */
+  --chrome:#161b21;       /* title bar / status bar */
+  --border:#232a32;
+  --fg:#d6dde3;
+  --dim:#7d8a96;
+  --faint:#3c4650;
+  --amber:#f0b445;        /* prompt, headings, cursor */
+  --sky:#7fb8dc;          /* paths, links, strings */
+  --violet:#b58bd9;       /* keywords */
+  --moss:#8fd18a;         /* ok / strings */
+  --rose:#e57979;         /* errors */
+  --orange:#e39d5a;       /* numbers */
+  --font:'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --fs:14px; --lh:1.6;
+  --glow:0 0 6px rgba(240,180,69,.35);
+}
+[data-theme="green"]{ --amber:#7ee787; --sky:#56d4b1; --glow:0 0 6px rgba(126,231,135,.35) }
+[data-theme="mono"]{ --amber:#d6dde3; --sky:#a9b3bc; --violet:#d6dde3; --moss:#d6dde3; --orange:#d6dde3; --glow:none }
+
+html,body{height:100%}
+body{margin:0;background:var(--desk);color:var(--fg);font-family:var(--font);font-size:var(--fs);line-height:var(--lh);-webkit-font-smoothing:antialiased;overflow:hidden}
+a{color:var(--sky);text-decoration:underline;text-decoration-color:var(--faint);text-underline-offset:3px}
+a:hover,a:focus-visible{text-decoration-color:var(--sky);outline:none}
+
+/* ---------- window ---------- */
+#win{position:fixed;inset:14px;display:flex;flex-direction:column;background:var(--bg);border:1px solid var(--border);border-radius:8px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.02) inset}
+@media (max-width:600px){#win{inset:0;border-radius:0;border:none}}
+#titlebar{flex:none;height:36px;display:flex;align-items:center;padding:0 12px;background:var(--chrome);border-bottom:1px solid var(--border);color:var(--dim);font-size:12px;user-select:none}
+.lights{display:flex;gap:8px;margin-right:14px}
+.lights i{width:12px;height:12px;border-radius:50%;display:block}
+.lights i:nth-child(1){background:#ff5f57}.lights i:nth-child(2){background:#febc2e}.lights i:nth-child(3){background:#28c840}
+#titlebar .tab{margin:0 auto;display:flex;align-items:center;gap:8px}
+#titlebar .tab::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--moss)}
+#titlebar .right{color:var(--faint)}
+#titlebar .right span{margin-left:12px}
+
+#body{position:relative;flex:1;min-height:0}
+/* scanlines + vignette, very light */
+#body::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:3;
+  background:
+    repeating-linear-gradient(0deg, rgba(255,255,255,.018) 0 1px, transparent 1px 3px),
+    radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,.35) 100%)}
+
+/* ---------- gate ---------- */
+#gate{position:absolute;inset:0;z-index:5;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;background:var(--bg);transition:opacity .45s ease}
+#gate.hide{opacity:0;pointer-events:none}
+#gate .cmt{color:var(--faint);font-size:13px;margin-bottom:18px}
+#gate .big{font-size:clamp(24px,5vw,44px);font-weight:500;letter-spacing:-.01em;min-height:1.3em;text-shadow:var(--glow)}
+#gate .big .k{color:var(--violet)}#gate .big .s{color:var(--moss)}#gate .big .p{color:var(--dim)}
+#gate .big .cur{background:var(--amber);display:inline-block;width:.55em;height:1.05em;vertical-align:-.15em;margin-left:.08em;animation:blink 1s steps(1) infinite}
+#gate .hint{margin-top:26px;color:var(--dim);opacity:0;transition:opacity .6s ease;font-size:13px}
+#gate .hint.show{opacity:1}
+kbd.k{border:1px solid var(--faint);border-bottom-width:2px;border-radius:4px;padding:0 6px;color:var(--fg);font:inherit;font-size:.9em}
+#gate kbd{border:1px solid var(--faint);border-bottom-width:2px;border-radius:4px;padding:1px 8px;color:var(--fg);font:inherit}
+#gate .tap{display:none}
+@media (hover:none){#gate .key{display:none}#gate .tap{display:inline}}
+
+/* ---------- terminal ---------- */
+#term{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;padding:16px clamp(12px,3vw,32px) 45vh;scrollbar-width:thin;scrollbar-color:var(--faint) transparent;opacity:0;transition:opacity .5s ease .15s}
+#term.show{opacity:1}
+#out{white-space:pre-wrap;word-wrap:break-word;max-width:100ch}
+.line{min-height:1em}
+.dim{color:var(--dim)}.faint{color:var(--faint)}.amb{color:var(--amber)}.sky{color:var(--sky)}.vio{color:var(--violet)}
+.ok{color:var(--moss)}.err{color:var(--rose)}.num{color:var(--orange)}.str{color:var(--moss)}.key{color:var(--sky)}
+.b{font-weight:700}.i{font-style:italic}.cmd{color:var(--fg)}
+.glow{text-shadow:var(--glow)}
+.ind{padding-left:2ch;display:block}
+.ln{display:inline-block;width:3ch;text-align:right;margin-right:2ch;color:var(--faint);user-select:none}
+.perm{color:var(--dim)}.dir{color:var(--sky);font-weight:700}
+.bar{color:var(--amber)}.bar-e{color:var(--faint)}
+.diff-add{color:var(--moss)}.diff-del{color:var(--rose)}
+
+/* two-line zsh prompt */
+.ps1 .dir{color:var(--sky);font-weight:700}
+.ps1 .arrow{color:var(--amber);font-weight:700}
+.ps1 .who{color:var(--dim)}
+
+#inline{display:flex;max-width:100ch;align-items:flex-start}
+#inline .ps1{white-space:pre;flex:none}
+#inline .typed{white-space:pre-wrap;word-break:break-all}
+#caret{display:inline-block;width:.6em;height:1.15em;background:var(--amber);vertical-align:-.2em;animation:blink 1s steps(1) infinite;box-shadow:var(--glow)}
+#caret.idle{animation:none;background:var(--faint);box-shadow:none}
+#inline.hidden{display:none}
+#ghost{white-space:pre;margin-left:-.6em;padding-left:.6em}
+#ghost:empty{display:none}
+#hidden-input{position:fixed;opacity:0;left:-9999px;top:0;width:1px;height:1px}
+
+/* tmux-style status bar */
+#status{flex:none;height:26px;display:flex;align-items:center;background:var(--chrome);border-top:1px solid var(--border);font-size:12px;color:var(--dim);user-select:none;overflow:hidden}
+#status .seg{padding:0 12px;height:100%;display:flex;align-items:center;white-space:nowrap}
+#status .seg.hi{background:var(--amber);color:var(--bg);font-weight:700}
+#status .seg.mode{color:var(--moss)}
+#status .grow{flex:1}
+@media (max-width:600px){#status .hide-m{display:none}}
+
+@keyframes blink{50%{opacity:0}}
+@media (prefers-reduced-motion:reduce){#gate .cur,#caret{animation:none}#gate,#term{transition:none}}
+::selection{background:var(--amber);color:var(--bg)}
