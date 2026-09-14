@@ -58,13 +58,18 @@ onMounted(() => {
 
   const esc = (s: unknown) => String(s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c] as string))
   const sleep = (ms: number) => new Promise<void>(r => setTimeout(r, reduce ? 0 : ms))
-  const scroll = () => { term.scrollTop = term.scrollHeight }
+  let pinEl: HTMLElement | null = null
+  const scroll = () => {
+    if (pinEl) term.scrollTop = Math.max(0, pinEl.offsetTop - term.clientTop)
+    else term.scrollTop = term.scrollHeight
+  }
   const pad = (s: unknown, n: number) => String(s).padEnd(n)
 
   function print(html = '', cls = '') { const d = document.createElement('div'); d.className = 'line' + (cls ? ' ' + cls : ''); d.innerHTML = html; out.appendChild(d); scroll(); return d }
   async function printCmd(cmd: string) {
     const d = print(PS1()); const span = document.createElement('span'); span.className = 'cmd'; d.appendChild(span)
     for (const ch of cmd) { span.textContent += ch; await sleep(40 + Math.random() * 40) } await sleep(160)
+    return d
   }
   const codeLine = (n: number | string, html: string) => print(`<span class="ln">${n}</span>${html}`)
 
@@ -171,7 +176,7 @@ onMounted(() => {
 
   async function run(raw: string) {
     const input = raw.trim()
-    print(PS1() + `<span class="cmd">${esc(input)}</span>`)
+    pinEl = print(PS1() + `<span class="cmd">${esc(input)}</span>`)
     if (!input) return
     history.push(input); hIdx = history.length
     if (SUGGEST[sIdx] && input.toLowerCase() === SUGGEST[sIdx]) sIdx++
@@ -218,10 +223,10 @@ onMounted(() => {
   }
 
   /* ---------- input ---------- */
-  function render() { typedEl.textContent = buffer; updateGhost(); scroll() }
+  function render() { pinEl = null; typedEl.textContent = buffer; updateGhost(); scroll() }
   function focusInput() { hidden.focus({ preventScroll: true }) }
   let ready = false
-  hidden.addEventListener('input', () => { buffer = hidden.value; render() })
+  hidden.addEventListener('input', () => { pinEl = null; buffer = hidden.value; render() })
   hidden.addEventListener('keydown', async (e) => {
     if (!ready) return
     if (e.key === 'Enter') { e.preventDefault(); const v = buffer || suggestion(); buffer = ''; hidden.value = ''; render(); inlineEl.classList.add('hidden'); await run(v); inlineEl.classList.remove('hidden'); scroll() }
@@ -267,7 +272,7 @@ onMounted(() => {
     for (const [s, t] of steps) { const d = print(`<span class="dim">[ <span class="faint">....</span> ] ${esc(s)}</span>`); await sleep(t); d.innerHTML = `<span class="dim">[  <span class="ok">OK</span>  ] ${esc(s)}</span>` }
     print(''); await sleep(250); await banner(); print(''); await sleep(300)
 
-    await printCmd('cat README.md'); renderWhoami(); print(''); await sleep(500)
+    pinEl = await printCmd('cat README.md'); renderWhoami(); print(''); await sleep(500)
     print(`<span class="dim">type</span> <span class="cmd">help</span> <span class="dim">to see what I answer to, or</span> <span class="cmd">contact</span> <span class="dim">to skip straight to me.</span>`)
     print(`<span class="dim">Press</span> <kbd class="k">Tab</kbd> <span class="dim">or</span> <kbd class="k">Enter</kbd> <span class="dim">to run the suggested command, or type your own.</span>`)
     print('')
