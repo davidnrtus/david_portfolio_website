@@ -8,7 +8,7 @@ import { ME } from '~/data/portfolio'
 const SITE = 'https://doantu.dev'
 const title = `${ME.name} — ${ME.title}`
 const description =
-  'David (Nguyen Doan Tu) — front-end developer with 5+ years building SPAs in Vue, Nuxt and TypeScript, plus React, React Native and Kotlin. An interactive terminal portfolio you can talk to.'
+  'David (Nguyen Doan Tu) — front-end developer with 5+ years building SPAs in Vue, Nuxt and TypeScript, plus React and React Native, now moving into back-end (Node.js, NestJS) toward full-stack. An interactive terminal portfolio you can talk to.'
 const ogImage = `${SITE}/og.png`
 
 useSeoMeta({
@@ -57,7 +57,7 @@ useHead({
         address: { '@type': 'PostalAddress', addressLocality: ME.location },
         email: ME.contact.email ? `mailto:${ME.contact.email}` : undefined,
         sameAs: [ME.contact.linkedin, ME.contact.github].filter(Boolean),
-        knowsAbout: ME.skills.map(s => s[0]),
+        knowsAbout: ME.skills.flatMap(g => g.items.map(s => s[0])),
       }),
     },
   ],

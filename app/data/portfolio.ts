@@ -31,15 +31,31 @@ export interface Project {
 /** [label, level] where level is 0–10, rendered as a bar */
 export type Skill = [string, number]
 
+export interface SkillGroup {
+  label: string
+  items: Skill[]
+}
+
+export interface Goals {
+  now: string
+  next: string
+  why: string[]
+}
+
 export interface Me {
   user: string
   host: string
   name: string
+  /** SEO / social job title */
   title: string
+  role: string
+  focus: string
+  goal: string
   location: string
   bio: string[]
+  goals: Goals
   contact: Contact
-  skills: Skill[]
+  skills: SkillGroup[]
   experience: Experience[]
   projects: Project[]
 }
@@ -47,7 +63,10 @@ export interface Me {
 export const ME: Me = {
   user: 'david', host: 'portfolio',
   name: 'Nguyen Doan Tu',
-  title: 'Front-end developer · Vue / Nuxt / TypeScript',
+  title: 'Front-end developer moving to full-stack · Vue / Nuxt / React',
+  role: 'Front-end developer',
+  focus: 'Vue · Nuxt · React · TypeScript',
+  goal: 'Full-stack developer',
   location: 'Hanoi, Vietnam',
   bio: [
     'I build web front-ends — mostly Vue and Nuxt, in TypeScript — and have',
@@ -57,7 +76,18 @@ export const ME: Me = {
     'consistent as a codebase grows. I have worked across domains such as',
     'social platforms, Web3, e-commerce and more. I work closely with',
     'designers, backend engineers and product.',
+    '',
+    'Now expanding into the backend with Node.js and NestJS — my goal is to',
+    'own products end-to-end as a full-stack developer.',
   ],
+  goals: {
+    now: 'Front-end engineer @ Xantus — large-scale SPAs in Vue & Nuxt 3.',
+    next: 'Full-stack — deepening Node.js / NestJS, database & system design.',
+    why: [
+      'I already ship products end-to-end (web + AI-assisted Android apps).',
+      'Backend is the next layer I want to own, not just consume.',
+    ],
+  },
   contact: {
     email: 'doantufptu@gmail.com',
     phone: '+84 969 876 218',
@@ -66,13 +96,35 @@ export const ME: Me = {
     cv: '',
   },
   skills: [
-    ['Vue.js', 9],
-    ['Nuxt.js (2 & 3)', 9],
-    ['React.js / Next.js / React Native', 6],
-    ['Node.js / NestJS', 5],
-    ['JavaScript / TypeScript', 9],
-    ['Pinia / Vuex', 8],
-    ['TailwindCSS', 8],
+    {
+      label: 'frontend',
+      items: [
+        ['Vue.js / Nuxt.js (2 & 3)', 9],
+        ['React.js / Next.js', 6],
+        ['Pinia / Vuex', 8],
+        ['TailwindCSS / Sass / PostCSS', 8],
+      ],
+    },
+    {
+      label: 'backend',
+      items: [
+        ['Node.js / NestJS', 5],
+        ['REST APIs', 6],
+      ],
+    },
+    {
+      label: 'language',
+      items: [
+        ['JavaScript / TypeScript', 9],
+      ],
+    },
+    {
+      label: 'mobile',
+      items: [
+        ['React Native', 6],
+        ['Kotlin / Android (AI-assisted)', 5],
+      ],
+    },
   ],
   // newest first
   experience: [

@@ -79,7 +79,9 @@ onMounted(() => {
     let n = 1
     codeLine(n++, `<span class="vio">const</span> <span class="amb b glow">developer</span> = {`)
     codeLine(n++, `  <span class="key">name</span>:       <span class="str">"${esc(ME.name)}"</span>,`)
-    codeLine(n++, `  <span class="key">title</span>:      <span class="str">"${esc(ME.title)}"</span>,`)
+    codeLine(n++, `  <span class="key">role</span>:       <span class="str">"${esc(ME.role)}"</span>,`)
+    codeLine(n++, `  <span class="key">focus</span>:      <span class="str">"${esc(ME.focus)}"</span>,`)
+    codeLine(n++, `  <span class="key">goal</span>:       <span class="amb b glow">"${esc(ME.goal)}"</span>, <span class="dim">// where I'm headed →</span>`)
     codeLine(n++, `  <span class="key">location</span>:   <span class="str">"${esc(ME.location)}"</span>,`)
     codeLine(n++, `  <span class="key">openToWork</span>: <span class="vio">true</span>,`)
     codeLine(n++, `}`)
@@ -131,11 +133,28 @@ onMounted(() => {
   function renderSkills() {
     print(`<span class="dim">$ ./skills --graph</span>`)
     print('')
-    const w = Math.max(...ME.skills.map(s => s[0].length)) + 2
-    ME.skills.forEach(([k, v]) => {
-      const full = '█'.repeat(v), empty = '░'.repeat(10 - v)
-      print(`${esc(pad(k, w))}<span class="bar">${full}</span><span class="bar-e">${empty}</span>`)
+    const all = ME.skills.flatMap(g => g.items)
+    const w = Math.max(...all.map(s => s[0].length)) + 4   // +2 indent, +2 gap
+    ME.skills.forEach((g, i) => {
+      if (i) print('')
+      print(`<span class="amb">${esc(g.label)}</span>`)
+      g.items.forEach(([k, v]) => {
+        const full = '█'.repeat(v), empty = '░'.repeat(10 - v)
+        print(`  ${esc(pad(k, w - 2))}<span class="bar">${full}</span><span class="bar-e">${empty}</span>`)
+      })
     })
+  }
+  function renderGoals() {
+    const g = ME.goals
+    print(`<span class="dim">$ cat ROADMAP.md</span>`)
+    print('')
+    print(`<span class="amb b">now</span>  <span class="dim">→</span> ${esc(g.now)}`)
+    print(`<span class="amb b glow">next</span> <span class="dim">→</span> <span class="b">${esc(g.next)}</span>`)
+    print('')
+    print(`<span class="dim">// why</span>`)
+    g.why.forEach(l => print(`<span class="dim">${esc(l)}</span>`))
+    print('')
+    print(`<span class="faint"># open to full-stack roles.</span> <span class="cmd">contact</span> <span class="faint">to talk.</span>`)
   }
   function renderContact() {
     const c = ME.contact
@@ -154,7 +173,7 @@ onMounted(() => {
   function renderHelp() {
     const rows: [string, string][] = [
       ['whoami', 'who I am'], ['experience', 'companies and roles'], ['projects', 'everything I\'ve built, as source'],
-      ['project <id>', 'filter to one'], ['skills', 'skill graph'], ['contact', '~/.contactrc'],
+      ['project <id>', 'filter to one'], ['skills', 'skill graph'], ['goals', 'where I\'m headed →'], ['contact', '~/.contactrc'],
       ['email · phone · linkedin · github · cv', 'one thing, fast'], ['send <message>', 'email me from the prompt'],
       ['theme <amber|green|mono>', 'change phosphor'], ['clear', 'Ctrl+L works too'],
     ]
@@ -167,7 +186,7 @@ onMounted(() => {
   /* ---------- commands ---------- */
   const history: string[] = []; let hIdx = -1; let buffer = ''
   const ghostEl = $('#ghost')
-  const SUGGEST = ['help', 'experience', 'ls projects', 'skills', 'contact']   // guided path, in order
+  const SUGGEST = ['help', 'experience', 'ls projects', 'skills', 'goals', 'contact']   // guided path, in order
   let sIdx = 0
   function suggestion() {
     if (!buffer) return SUGGEST[sIdx] || ''
@@ -176,7 +195,7 @@ onMounted(() => {
     return m ? m.slice(buffer.length) : ''
   }
   function updateGhost() { ghostEl.textContent = ready ? suggestion() : '' }
-  const COMMANDS = ['help', 'whoami', 'about', 'experience', 'projects', 'project', 'skills', 'contact', 'email', 'phone', 'linkedin', 'github', 'cv', 'resume', 'send', 'theme', 'clear', 'history', 'banner', 'exit', 'sudo', 'ls', 'cat', 'pwd', 'cd', 'neofetch', 'echo', 'rm', 'vim', 'nano']
+  const COMMANDS = ['help', 'whoami', 'about', 'experience', 'projects', 'project', 'skills', 'goals', 'now', 'roadmap', 'contact', 'email', 'phone', 'linkedin', 'github', 'cv', 'resume', 'send', 'theme', 'clear', 'history', 'banner', 'exit', 'sudo', 'ls', 'cat', 'pwd', 'cd', 'neofetch', 'echo', 'rm', 'vim', 'nano']
 
   async function run(raw: string) {
     const input = raw.trim()
@@ -195,8 +214,9 @@ onMounted(() => {
       case 'ls': if (!arg || /projects/.test(arg) || cwd === '~/projects') renderProjects(); else print(`<span class="dir">projects</span>  <span class="dim">experience.log  .contactrc  README.md</span>`); break
       case 'cd': cwd = /projects/.test(arg) ? '~/projects' : '~'; setPrompt(); break
       case 'project': case 'cat': case 'vim': case 'nano': case 'open':
-        if (/readme/i.test(arg)) renderWhoami(); else if (/experience/.test(arg)) renderExperience(); else if (/contactrc/.test(arg)) renderContact(); else renderProject(pid(arg)); break
+        if (/readme/i.test(arg)) renderWhoami(); else if (/experience/.test(arg)) renderExperience(); else if (/contactrc/.test(arg)) renderContact(); else if (/roadmap/i.test(arg)) renderGoals(); else renderProject(pid(arg)); break
       case 'skills': renderSkills(); break
+      case 'goals': case 'now': case 'roadmap': renderGoals(); break
       case 'contact': renderContact(); break
       case 'email': print(`<a href="mailto:${ME.contact.email}">${esc(ME.contact.email)}</a>`); break
       case 'phone': print(`<a href="tel:${ME.contact.phone.replace(/\s/g, '')}">${esc(ME.contact.phone)}</a>`); break
