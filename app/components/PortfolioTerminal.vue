@@ -38,7 +38,7 @@
 
 <script setup lang="ts">
 import { onMounted } from 'vue'
-import { ME } from '~/data/portfolio'
+import { ME, type Project } from '~/data/portfolio'
 
 onMounted(() => {
   /* =====================================================================
@@ -98,31 +98,34 @@ onMounted(() => {
       print('')
     })
   }
-  function renderProjects() {
-    print(`<span class="dim">$ ls -la ~/projects</span>`)
-    print(`<span class="dim">total ${ME.projects.length}</span>`)
-    const w = Math.max(...ME.projects.map(p => p.id.length)) + 2
-    ME.projects.forEach(p => {
-      const size = String(p.desc.join(' ').length * 7).padStart(5)
-      print(`<span class="perm">drwxr-xr-x</span>  ${esc(ME.user)} <span class="num">${size}</span>  <span class="dir">${esc(pad(p.id, w))}</span><span class="dim">${esc(p.tagline)}</span>`)
-    })
-    print('')
-    print(`<span class="faint"># open one:</span> <span class="cmd">cat projects/${ME.projects[0].id}</span> <span class="faint">or</span> <span class="cmd">project ${ME.projects[0].id}</span>`)
-  }
-  function renderProject(id: string) {
-    const p = ME.projects.find(x => x.id === id)
-    if (!p) return print(`<span class="err">cat: projects/${esc(id || '')}: No such file or directory</span>  <span class="dim">→</span> <span class="cmd">ls projects</span>`)
+  function projectBlock(p: Project) {
+    const ext = p.lang === 'Kotlin' ? 'kt' : p.lang === 'Dart' ? 'dart' : 'ts'
+    const kv = (k: string) => `<span class="key">${esc(k)}</span>:${' '.repeat(Math.max(1, 8 - k.length))}`
     let n = 1
-    codeLine(n++, `<span class="faint">// ${esc(p.id)}.${p.lang === 'Kotlin' ? 'kt' : p.lang === 'Dart' ? 'dart' : 'ts'}</span>`)
+    codeLine(n++, `<span class="faint">// ${esc(p.id)}.${ext}</span>`)
     codeLine(n++, `<span class="vio">export const</span> <span class="amb b glow">${esc(p.id)}</span> = {`)
-    codeLine(n++, `  <span class="key">tagline</span>: <span class="str">"${esc(p.tagline)}"</span>,`)
-    codeLine(n++, `  <span class="key">stack</span>:   [${p.stack.map(s => `<span class="str">"${esc(s)}"</span>`).join(', ')}],`)
-    if (p.link) codeLine(n++, `  <span class="key">url</span>:     <span class="str">"<a href="${p.link}" target="_blank" rel="noopener">${esc(p.link)}</a>"</span>,`)
+    codeLine(n++, `  ${kv('name')}<span class="str">"${esc(p.name)}"</span>,`)
+    codeLine(n++, `  ${kv('year')}<span class="num">${p.year}</span>,`)
+    codeLine(n++, `  ${kv('tagline')}<span class="str">"${esc(p.tagline)}"</span>,`)
+    codeLine(n++, `  ${kv('stack')}[${p.stack.map(s => `<span class="str">"${esc(s)}"</span>`).join(', ')}],`)
+    if (p.link) codeLine(n++, `  ${kv('url')}<span class="str">"<a href="${p.link}" target="_blank" rel="noopener">${esc(p.link)}</a>"</span>,`)
     codeLine(n++, ``)
     codeLine(n++, `  <span class="dim">/**</span>`)
     p.desc.forEach(l => codeLine(n++, `<span class="dim">   * ${esc(l)}</span>`))
     codeLine(n++, `<span class="dim">   */</span>`)
     codeLine(n++, `}`)
+  }
+  function renderProjects() {
+    print(`<span class="dim">$ cat ~/projects/*</span>`)
+    print(`<span class="faint"># ${ME.projects.length} entries, newest first</span>`)
+    print('')
+    ME.projects.forEach((p, i) => { projectBlock(p); print(''); if (i < ME.projects.length - 1) print('') })
+    print(`<span class="faint"># filter one:</span> <span class="cmd">project ${ME.projects[0].id}</span>`)
+  }
+  function renderProject(id: string) {
+    const p = ME.projects.find(x => x.id === id)
+    if (!p) return print(`<span class="err">cat: projects/${esc(id || '')}: No such file or directory</span>  <span class="dim">→</span> <span class="cmd">projects</span>`)
+    projectBlock(p)
   }
   function renderSkills() {
     print(`<span class="dim">$ ./skills --graph</span>`)
@@ -149,8 +152,8 @@ onMounted(() => {
   }
   function renderHelp() {
     const rows: [string, string][] = [
-      ['whoami', 'who I am'], ['experience', 'companies and roles'], ['ls projects', 'what I\'ve built'],
-      ['cat projects/<id>', 'one project, as source'], ['skills', 'skill graph'], ['contact', '~/.contactrc'],
+      ['whoami', 'who I am'], ['experience', 'companies and roles'], ['projects', 'everything I\'ve built, as source'],
+      ['project <id>', 'filter to one'], ['skills', 'skill graph'], ['contact', '~/.contactrc'],
       ['email · phone · linkedin · github · cv', 'one thing, fast'], ['send <message>', 'email me from the prompt'],
       ['theme <amber|green|mono>', 'change phosphor'], ['clear', 'Ctrl+L works too'],
     ]
