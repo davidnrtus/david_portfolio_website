@@ -95,7 +95,7 @@ onMounted(() => {
     print(`<span class="faint"># ${ME.experience.length} entries, newest first</span>`)
     print('')
     ME.experience.forEach(e => {
-      print(`<span class="amb">${esc(pad(e.period, 13))}</span><span class="b">${esc(e.company)}</span>  <span class="dim">${esc(e.role)}</span>`)
+      print(`<span class="amb">${esc(pad(e.period, 21))}</span><span class="b">${esc(e.company)}</span>  <span class="dim">${esc(e.role)}</span>`)
       e.notes.forEach(nn => print(`<span class="ind"><span class="dim">·</span> ${esc(nn)}</span>`))
       print('')
     })
