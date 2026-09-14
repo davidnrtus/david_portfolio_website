@@ -166,7 +166,7 @@ onMounted(() => {
     row('phone', c.phone, `tel:${c.phone.replace(/\s/g, '')}`)
     row('linkedin', c.linkedin, c.linkedin)
     row('github', c.github, c.github)
-    row('cv', c.cv, c.cv)
+    if (c.cv) print(`<span class="key">${pad('cv', 10)}</span>= <span class="str">"<a href="${c.cv}" download>Download</a>"</span>`)
     print('')
     print(`<span class="faint"># or from here:</span> <span class="cmd">send Hi David, I'd like to talk about…</span>`)
   }
@@ -290,7 +290,7 @@ onMounted(() => {
       case 'phone': print(`<a href="tel:${ME.contact.phone.replace(/\s/g, '')}">${esc(ME.contact.phone)}</a>`); break
       case 'linkedin': print(ME.contact.linkedin ? `<a href="${ME.contact.linkedin}" target="_blank" rel="noopener">${esc(ME.contact.linkedin)}</a>` : `<span class="dim">no linkedin on file yet. try</span> <span class="cmd">email</span> <span class="dim">or</span> <span class="cmd">phone</span>`); break
       case 'github': print(ME.contact.github ? `<a href="${ME.contact.github}" target="_blank" rel="noopener">${esc(ME.contact.github)}</a>` : `<span class="dim">no github on file yet. try</span> <span class="cmd">email</span> <span class="dim">or</span> <span class="cmd">phone</span>`); break
-      case 'cv': case 'resume': print(ME.contact.cv ? `<a href="${ME.contact.cv}" target="_blank" rel="noopener">${esc(ME.contact.cv)}</a>` : `<span class="dim">no hosted cv yet. try</span> <span class="cmd">email</span> <span class="dim">or</span> <span class="cmd">phone</span>`); break
+      case 'cv': case 'resume': print(ME.contact.cv ? `<a href="${ME.contact.cv}" download>Download</a>` : `<span class="dim">no hosted cv yet. try</span> <span class="cmd">email</span> <span class="dim">or</span> <span class="cmd">phone</span>`); break
       case 'send': case 'mail': case 'message': {
         if (!arg) { print(`<span class="dim">usage:</span> <span class="cmd">send &lt;message&gt;</span>`); break }
         const href = `mailto:${ME.contact.email}?subject=${encodeURIComponent('Hello from your portfolio')}&body=${encodeURIComponent(arg)}`

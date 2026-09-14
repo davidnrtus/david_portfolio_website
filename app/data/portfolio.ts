@@ -93,7 +93,7 @@ export const ME: Me = {
     phone: '+84 969 876 218',
     linkedin: 'https://www.linkedin.com/in/doan-tu/',
     github: '',
-    cv: '',
+    cv: '/Nguyen-Doan-Tu-CV.pdf',
   },
   skills: [
     {
