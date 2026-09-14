@@ -103,3 +103,8 @@ kbd.k{border:1px solid var(--faint);border-bottom-width:2px;border-radius:4px;pa
 @keyframes blink{50%{opacity:0}}
 @media (prefers-reduced-motion:reduce){#gate .cur,#caret{animation:none}#gate,#term{transition:none}}
 ::selection{background:var(--amber);color:var(--bg)}
+
+/* ---------- rock-paper-scissors confetti ---------- */
+.confetti{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:30}
+.confetti span{position:absolute;top:-32px;line-height:1;will-change:transform,opacity;animation-name:confetti-fall;animation-timing-function:cubic-bezier(.3,.6,.5,1);animation-fill-mode:forwards}
+@keyframes confetti-fall{0%{transform:translateY(-10%) rotate(0);opacity:1}100%{transform:translateY(105vh) rotate(720deg);opacity:.15}}

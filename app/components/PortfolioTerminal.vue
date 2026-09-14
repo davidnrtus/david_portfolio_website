@@ -170,10 +170,73 @@ onMounted(() => {
     print('')
     print(`<span class="faint"># or from here:</span> <span class="cmd">send Hi David, I'd like to talk about…</span>`)
   }
+
+  /* ---------- rock-paper-scissors gate ---------- */
+  const RPS_EMO: Record<string, string> = { rock: '✊', paper: '✋', scissors: '✌️' }
+  const RPS_BEATS: Record<string, string> = { rock: 'scissors', scissors: 'paper', paper: 'rock' }
+  const RPS_TAUNTS = [
+    'skill issue 😏', 'the house always wins.', 'was that your final answer?',
+    'my RNG is undefeated.', 'so close… not really.', 'have you tried winning?',
+  ]
+  function startGame() {
+    gameMode = true; rpsRounds = 0; modeEl.textContent = '-- RPS --'
+    print(`<span class="amb b">🔒 ~/.contactrc is locked.</span>`)
+    print(`<span class="dim">Beat me at rock-paper-scissors and my contacts are yours.</span>`)
+    print('')
+    print(`<span class="cmd">rock ✊</span>   <span class="cmd">paper ✋</span>   <span class="cmd">scissors ✌️</span>`)
+    print(`<span class="faint">type</span> <span class="cmd">r</span> / <span class="cmd">p</span> / <span class="cmd">s</span> <span class="faint">·</span> <span class="cmd">q</span> <span class="faint">to quit</span>`)
+    updateGhost()
+  }
+  function endGame() {
+    gameMode = false; modeEl.textContent = '-- INSERT --'
+    print(`<span class="dim">left the challenge — contacts still locked. type</span> <span class="cmd">contact</span> <span class="dim">to try again.</span>`)
+    updateGhost()
+  }
+  async function handleGameInput(raw: string) {
+    const v = raw.trim().toLowerCase()
+    print(`<span class="amb">rps ❯</span> <span class="cmd">${esc(raw)}</span>`)
+    if (!v) return
+    if (['q', 'quit', 'exit'].includes(v)) { endGame(); return }
+    const move = ({ r: 'rock', rock: 'rock', p: 'paper', paper: 'paper', s: 'scissors', scissors: 'scissors' } as Record<string, string>)[v]
+    if (!move) { print(`<span class="dim">huh? pick</span> <span class="cmd">r</span> / <span class="cmd">p</span> / <span class="cmd">s</span> <span class="dim">(or</span> <span class="cmd">q</span> <span class="dim">to quit)</span>`); return }
+    await playRound(move)
+  }
+  async function playRound(move: string) {
+    rpsRounds++
+    const me = ['rock', 'paper', 'scissors'][Math.floor(Math.random() * 3)]
+    await sleep(reduce ? 0 : 260)
+    print(`<span class="dim">you</span> ${RPS_EMO[move]} ${move}   <span class="faint">vs</span>   <span class="dim">me</span> ${RPS_EMO[me]} ${me}`)
+    if (me === move) { print(`<span class="amb b">tie.</span> <span class="dim">go again.</span>`); return }
+    if (RPS_BEATS[move] === me) {
+      gameMode = false; modeEl.textContent = '-- INSERT --'
+      print(`<span class="ok b glow">🔓 you win${rpsRounds > 1 ? ` in ${rpsRounds} rounds` : ''}! unlocking contacts…</span>`)
+      confetti()
+      await sleep(reduce ? 0 : 900); print('')
+      unlocked = true; renderContact(); updateGhost()
+    } else {
+      print(`<span class="err">you lose.</span> <span class="dim">${esc(RPS_TAUNTS[Math.floor(Math.random() * RPS_TAUNTS.length)])}</span> <span class="faint">go again — r / p / s (q quits)</span>`)
+    }
+  }
+  function confetti() {
+    if (reduce) return
+    const box = document.createElement('div'); box.className = 'confetti'
+    const emo = ['🎉', '✨', '🎊', '🎈', '⭐', '🥳']
+    for (let i = 0; i < 48; i++) {
+      const s = document.createElement('span')
+      s.textContent = emo[Math.floor(Math.random() * emo.length)]
+      s.style.left = Math.random() * 100 + '%'
+      s.style.animationDuration = (0.9 + Math.random() * 0.9) + 's'
+      s.style.animationDelay = (Math.random() * 0.5) + 's'
+      s.style.fontSize = (14 + Math.random() * 16) + 'px'
+      box.appendChild(s)
+    }
+    $('#win').appendChild(box)
+    setTimeout(() => box.remove(), 2400)
+  }
   function renderHelp() {
     const rows: [string, string][] = [
       ['whoami', 'who I am'], ['experience', 'companies and roles'], ['projects', 'everything I\'ve built, as source'],
-      ['project <id>', 'filter to one'], ['skills', 'skill graph'], ['goals', 'where I\'m headed →'], ['contact', '~/.contactrc'],
+      ['project <id>', 'filter to one'], ['skills', 'skill graph'], ['goals', 'where I\'m headed →'], ['contact', '~/.contactrc 🔒 (win to unlock)'],
       ['email · phone · linkedin · github · cv', 'one thing, fast'], ['send <message>', 'email me from the prompt'],
       ['theme <amber|green|mono>', 'change phosphor'], ['clear', 'Ctrl+L works too'],
     ]
@@ -185,6 +248,7 @@ onMounted(() => {
 
   /* ---------- commands ---------- */
   const history: string[] = []; let hIdx = -1; let buffer = ''
+  let unlocked = false, gameMode = false, rpsRounds = 0   // rock-paper-scissors gate on contacts
   const ghostEl = $('#ghost')
   const SUGGEST = ['help', 'experience', 'ls projects', 'skills', 'goals', 'contact']   // guided path, in order
   let sIdx = 0
@@ -194,7 +258,7 @@ onMounted(() => {
     const m = [...SUGGEST, ...COMMANDS].find(c => c.startsWith(q) && c !== q)
     return m ? m.slice(buffer.length) : ''
   }
-  function updateGhost() { ghostEl.textContent = ready ? suggestion() : '' }
+  function updateGhost() { ghostEl.textContent = ready && !gameMode ? suggestion() : '' }
   const COMMANDS = ['help', 'whoami', 'about', 'experience', 'projects', 'project', 'skills', 'goals', 'now', 'roadmap', 'contact', 'email', 'phone', 'linkedin', 'github', 'cv', 'resume', 'send', 'theme', 'clear', 'history', 'banner', 'exit', 'sudo', 'ls', 'cat', 'pwd', 'cd', 'neofetch', 'echo', 'rm', 'vim', 'nano']
 
   async function run(raw: string) {
@@ -206,6 +270,10 @@ onMounted(() => {
     const [cmd, ...rest] = input.split(/\s+/); const arg = rest.join(' ')
     const pid = (a: string) => a.replace(/^~?\/?projects\//, '').replace(/\/$/, '').replace(/\.(kt|ts|dart)$/, '')
 
+    // contacts are locked behind a rock-paper-scissors game until you win once
+    const CONTACT_CMDS = ['contact', 'email', 'phone', 'linkedin', 'cv', 'resume', 'send', 'mail', 'message']
+    if (!unlocked && CONTACT_CMDS.includes(cmd.toLowerCase())) { startGame(); return }
+
     switch (cmd.toLowerCase()) {
       case 'help': case '?': case 'man': renderHelp(); break
       case 'whoami': case 'about': case 'neofetch': renderWhoami(); break
@@ -214,7 +282,7 @@ onMounted(() => {
       case 'ls': if (!arg || /projects/.test(arg) || cwd === '~/projects') renderProjects(); else print(`<span class="dir">projects</span>  <span class="dim">experience.log  .contactrc  README.md</span>`); break
       case 'cd': cwd = /projects/.test(arg) ? '~/projects' : '~'; setPrompt(); break
       case 'project': case 'cat': case 'vim': case 'nano': case 'open':
-        if (/readme/i.test(arg)) renderWhoami(); else if (/experience/.test(arg)) renderExperience(); else if (/contactrc/.test(arg)) renderContact(); else if (/roadmap/i.test(arg)) renderGoals(); else renderProject(pid(arg)); break
+        if (/readme/i.test(arg)) renderWhoami(); else if (/experience/.test(arg)) renderExperience(); else if (/contactrc/.test(arg)) { if (unlocked) renderContact(); else startGame() } else if (/roadmap/i.test(arg)) renderGoals(); else renderProject(pid(arg)); break
       case 'skills': renderSkills(); break
       case 'goals': case 'now': case 'roadmap': renderGoals(); break
       case 'contact': renderContact(); break
@@ -241,7 +309,7 @@ onMounted(() => {
       case 'banner': await banner(); break
       case 'sudo': print(`<span class="err">${esc(ME.user)} is not in the sudoers file.  This incident will be reported.</span>`); break
       case 'rm': print(`<span class="err">rm: cannot remove '${esc(arg || '')}': Permission denied</span> <span class="faint">(nice try)</span>`); break
-      case 'exit': case 'quit': case 'logout': print(`<span class="dim">Connection to ${ME.host} kept alive. Try</span> <span class="cmd">contact</span> <span class="dim">instead.</span>`); break
+      case 'exit': case 'quit': case 'logout': case 'q': print(`<span class="dim">Connection to ${ME.host} kept alive. Try</span> <span class="cmd">contact</span> <span class="dim">instead.</span>`); break
       default: print(`<span class="err">zsh: command not found: ${esc(cmd)}</span>  <span class="dim">→</span> <span class="cmd">help</span>`)
     }
   }
@@ -253,6 +321,11 @@ onMounted(() => {
   hidden.addEventListener('input', () => { pinEl = null; buffer = hidden.value; render() })
   hidden.addEventListener('keydown', async (e) => {
     if (!ready) return
+    if (gameMode) {
+      if (e.key === 'Enter') { e.preventDefault(); const v = buffer; buffer = ''; hidden.value = ''; render(); inlineEl.classList.add('hidden'); await handleGameInput(v); inlineEl.classList.remove('hidden'); scroll() }
+      else if (e.key === 'c' && e.ctrlKey) { e.preventDefault(); buffer = hidden.value = ''; render(); endGame() }
+      return
+    }
     if (e.key === 'Enter') { e.preventDefault(); const v = buffer || suggestion(); buffer = ''; hidden.value = ''; render(); inlineEl.classList.add('hidden'); await run(v); inlineEl.classList.remove('hidden'); scroll() }
     else if (e.key === 'ArrowUp') { e.preventDefault(); if (hIdx > 0) { hIdx--; buffer = hidden.value = history[hIdx]; render() } }
     else if (e.key === 'ArrowDown') { e.preventDefault(); hIdx = Math.min(hIdx + 1, history.length); buffer = hidden.value = history[hIdx] || ''; render() }
