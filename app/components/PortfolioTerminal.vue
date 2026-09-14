@@ -111,6 +111,7 @@ onMounted(() => {
     if (p.link) codeLine(n++, `  ${kv('url')}<span class="str">"<a href="${p.link}" target="_blank" rel="noopener">${esc(p.link)}</a>"</span>,`)
     codeLine(n++, ``)
     codeLine(n++, `  <span class="dim">/**</span>`)
+    codeLine(n++, `<span class="dim">   * <span class="key">@responsibilities</span></span>`)
     p.desc.forEach(l => codeLine(n++, `<span class="dim">   * ${esc(l)}</span>`))
     codeLine(n++, `<span class="dim">   */</span>`)
     codeLine(n++, `}`)
