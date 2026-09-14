@@ -68,11 +68,11 @@ export const ME: Me = {
   skills: [
     ['Vue.js', 9],
     ['Nuxt.js (2 & 3)', 9],
-    ['JavaScript (ES6+)', 9],
-    ['TypeScript', 8],
+    ['React.js / Next.js / React Native', 6],
+    ['Node.js / NestJS', 5],
+    ['JavaScript / TypeScript', 9],
     ['Pinia / Vuex', 8],
     ['TailwindCSS', 8],
-    ['React.js / React Native', 6],
   ],
   // newest first
   experience: [
