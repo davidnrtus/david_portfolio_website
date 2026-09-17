@@ -71,8 +71,9 @@ kbd.k{border:1px solid var(--faint);border-bottom-width:2px;border-radius:4px;pa
 .ok{color:var(--moss)}.err{color:var(--rose)}.num{color:var(--orange)}.str{color:var(--moss)}.key{color:var(--sky)}
 .b{font-weight:700}.i{font-style:italic}.cmd{color:var(--fg)}
 .glow{text-shadow:var(--glow)}
-.ind{padding-left:2ch;display:block}
+.ind{padding-left:2ch;text-indent:-2ch;display:block}
 .ln{display:inline-block;width:3ch;text-align:right;margin-right:2ch;color:var(--faint);user-select:none}
+.codeline{padding-left:5ch;text-indent:-5ch}
 .perm{color:var(--dim)}.dir{color:var(--sky);font-weight:700}
 .bar{color:var(--amber)}.bar-e{color:var(--faint)}
 .diff-add{color:var(--moss)}.diff-del{color:var(--rose)}
@@ -99,6 +100,22 @@ kbd.k{border:1px solid var(--faint);border-bottom-width:2px;border-radius:4px;pa
 #status .seg.mode{color:var(--moss)}
 #status .grow{flex:1}
 @media (max-width:600px){#status .hide-m{display:none}}
+
+/* ---------- structured rows (help / experience / skills) ---------- */
+/* On desktop these render like the old monospace-padded layout; on mobile
+   we drop to a two-line stack so a wrapped description doesn't visually
+   merge into the next command. */
+.hrow,.xrow,.srow{display:inline}
+.hcmd,.hdesc,.xperiod,.xco,.xrole,.skey,.sbars{white-space:pre}
+@media (max-width:600px){
+  .hrow,.xrow,.srow{display:block}
+  .hcmd,.xperiod,.skey{display:block;white-space:pre-wrap}
+  .hdesc,.xco,.xrole,.sbars{display:block;padding-left:2ch;white-space:pre-wrap}
+  .xperiod{padding-left:0}
+  .xco{margin-top:0}
+  .xrole{padding-left:2ch}
+  .srow .sbars{padding-left:2ch}
+}
 
 @keyframes blink{50%{opacity:0}}
 @media (prefers-reduced-motion:reduce){#gate .cur,#caret{animation:none}#gate,#term{transition:none}}

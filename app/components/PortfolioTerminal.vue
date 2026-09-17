@@ -71,7 +71,7 @@ onMounted(() => {
     for (const ch of cmd) { span.textContent += ch; await sleep(40 + Math.random() * 40) } await sleep(160)
     return d
   }
-  const codeLine = (n: number | string, html: string) => print(`<span class="ln">${n}</span>${html}`)
+  const codeLine = (n: number | string, html: string) => print(`<span class="ln">${n}</span>${html}`, 'codeline')
 
   /* ---------- renderers ---------- */
   function renderWhoami() {
@@ -95,7 +95,13 @@ onMounted(() => {
     print(`<span class="faint"># ${ME.experience.length} entries, newest first</span>`)
     print('')
     ME.experience.forEach(e => {
-      print(`<span class="amb">${esc(pad(e.period, 21))}</span><span class="b">${esc(e.company)}</span>  <span class="dim">${esc(e.role)}</span>`)
+      print(
+        `<span class="xrow">`
+        + `<span class="xperiod amb">${esc(pad(e.period, 21))}</span>`
+        + `<span class="xco b">${esc(e.company)}</span>`
+        + `<span class="xrole dim">  ${esc(e.role)}</span>`
+        + `</span>`
+      )
       e.notes.forEach(nn => print(`<span class="ind"><span class="dim">·</span> ${esc(nn)}</span>`))
       print('')
     })
@@ -140,7 +146,12 @@ onMounted(() => {
       print(`<span class="amb">${esc(g.label)}</span>`)
       g.items.forEach(([k, v]) => {
         const full = '█'.repeat(v), empty = '░'.repeat(10 - v)
-        print(`  ${esc(pad(k, w - 2))}<span class="bar">${full}</span><span class="bar-e">${empty}</span>`)
+        print(
+          `<span class="srow">`
+          + `<span class="skey">  ${esc(pad(k, w - 2))}</span>`
+          + `<span class="sbars"><span class="bar">${full}</span><span class="bar-e">${empty}</span></span>`
+          + `</span>`
+        )
       })
     })
   }
@@ -242,7 +253,12 @@ onMounted(() => {
     ]
     const w = Math.max(...rows.map(r => r[0].length)) + 2
     print(`<span class="dim">Usage:</span> <span class="cmd">&lt;command&gt; [args]</span>`); print('')
-    rows.forEach(([c, d]) => print(`  <span class="amb">${esc(pad(c, w))}</span><span class="dim">${esc(d)}</span>`))
+    rows.forEach(([c, d]) => print(
+      `<span class="hrow">`
+      + `<span class="hcmd amb">  ${esc(pad(c, w - 2))}  </span>`
+      + `<span class="hdesc dim">${esc(d)}</span>`
+      + `</span>`
+    ))
     print(''); print(`<span class="faint">Tab completes · ↑↓ history · Ctrl+C cancels</span>`)
   }
 
